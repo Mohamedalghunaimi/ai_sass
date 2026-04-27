@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  # خدمة التطبيق (Node.js + Prisma)
+  app:
+    image: my-registry.com/my-app:v1.0.0  # يفضل استخدام Image جاهزة من سجل خاص
+    build:
+      context: .
+      dockerfile: Dockerfile.prod              # استخدام Dockerfile الإنتاج (Multi-stage)
+    restart: always                       # إعادة التشغيل تلقائياً في حال حدوث خطأ
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}      # جلب القيم من ملف .env الخارجي
+    ports:
+      - "3000:3000"
+    logging:                              # تحديد حجم سجلات البيانات لمنع امتلاء القرص
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+
+
+

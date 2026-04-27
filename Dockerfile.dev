@@ -1,0 +1,25 @@
+# استخدام نسخة Node خفيفة
+FROM node:20-alpine
+
+# تثبيت OpenSSL (ضروري لعمل Prisma على Alpine)
+RUN apk add --no-cache openssl
+
+WORKDIR /app
+
+# نسخ ملفات التعريف أولاً للاستفادة من الـ Caching
+COPY package*.json ./
+COPY prisma ./prisma/
+
+# تثبيت كافة المكتبات (بما فيها الـ devDependencies)
+RUN npm install
+
+# توليد Prisma Client
+RUN npx prisma generate
+
+# ملاحظة: لا نقوم بنسخ الكود هنا لأننا سنستخدم Volumes في Docker Compose
+# لربط الكود المباشر من جهازك بالحاوية
+
+EXPOSE 3000
+
+# تشغيل التطبيق في وضع التطوير
+CMD ["npm", "run", "start:dev"]

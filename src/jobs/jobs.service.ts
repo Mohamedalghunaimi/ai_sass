@@ -31,7 +31,7 @@ export class JobsService {
       }
     })
 
-    await this.aiService.addJob(newJob.id as string,userId,input)
+    await this.aiService.addJob(newJob.id,userId,input)
 
 
   return {

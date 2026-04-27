@@ -8,24 +8,25 @@ import { Job } from 'bullmq';
 import { resolve } from 'path';
 import { ModelAiService } from 'src/model-ai/model-ai.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { RedisService } from 'src/redis/redis.service';
 
 @Processor('ai-job')
 export class AiProcessor extends WorkerHost {
 
     constructor(
         private readonly prisma:PrismaService,
-        private readonly modelAiService:ModelAiService
+        private readonly modelAiService:ModelAiService,
+        private readonly redis:RedisService
+
     ) {
         super();
     }
     
-    async process(job: Job, token?: string): Promise<any> {
+    async process(job: Job<{jobId:string,userId:string,input:string}>, token?: string): Promise<any> {
 
-        const {jobId,userId,input}  = job.data as {
-            jobId:string,
-            userId:string,
-            input:string
-        };
+        const {jobId,userId,input}  = job.data ;
+
+        
         try {
         await this.prisma.job.update({
             where:{id:jobId,userId},
@@ -33,7 +34,19 @@ export class AiProcessor extends WorkerHost {
                 status:"PROCESSING"
             }
         })
-        const output = await this.modelAiService.generateText(input)
+        const key = `ai-${input}`;
+
+        const cached = await this.redis.client.get(key);
+        let output :string ;
+        if(cached) {
+            output = cached
+        } else {
+            output = await this.modelAiService.generateText(input) as string;
+            await this.redis.client.set(key,output)
+        }
+
+    
+
         await this.prisma.job.update({
             where:{id:jobId,userId},
             data:{
@@ -41,9 +54,18 @@ export class AiProcessor extends WorkerHost {
                 output
             }
         })
+        await this.redis.pub.publish(
+            'notifications',
+            JSON.stringify({
+            userId,
+            jobId,
+            status: 'DONE',
+            output,
+            }),
+        );
 
         } catch (error) {
-            console.error(error)
+
             await this.prisma.job.update({
                 where:{id:jobId,userId},
                 data:{

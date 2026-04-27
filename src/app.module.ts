@@ -10,6 +10,8 @@ import { JobsModule } from './jobs/jobs.module';
 import { BullModule } from '@nestjs/bullmq';
 import { AiModule } from './ai/ai.module';
 import { ModelAiModule } from './model-ai/model-ai.module';
+import { RedisModule } from './redis/redis.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -31,6 +33,7 @@ import { ModelAiModule } from './model-ai/model-ai.module';
           connection:{
               host: config.get<string>("REDIS_HOST"),
               port: Number(config.get<number>("REDIS_PORT")),
+              maxRetriesPerRequest: null,
           }
         }
 
@@ -38,7 +41,9 @@ import { ModelAiModule } from './model-ai/model-ai.module';
 
     }),
     AiModule,
-    ModelAiModule
+    ModelAiModule,
+    RedisModule,
+    NotificationsModule
   ],
   controllers: [AppController],
   providers: [AppService],
