@@ -10,18 +10,31 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+enum JobType {
+  AI_GENERATION
+  PDF_SUMMARY
+}
 
+enum JobStatus {
+  PENDING
+  PROCESSING
+  DONE
+  FAILED
+}
 model User {
   id        String   @id @default(cuid())
   name      String
   email     String   @unique
-  password  String?
+  password  String
   createdAt DateTime @default(now())
 
 
   tokens Session[]
   @@index([email])
   @@map("users")
+  jobs Job[]
+  notifications Notification[]
+  chats Chat[]
 }
 
 model Session {
@@ -35,4 +48,60 @@ model Session {
   @@unique([userId,hashRefreshToken])
   @@index([userId])
   @@map("sessions")
+}
+
+model Job {
+  id        String   @id @default(cuid())
+
+  type      JobType
+  status    JobStatus @default(PENDING)
+
+  input     String
+  output    String?
+
+  userId    String
+  user      User @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+
+  message   String
+  isRead    Boolean  @default(false)
+
+  userId    String
+  user      User @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Chat {
+  id        String   @id @default(cuid())
+
+  userId    String
+  user      User @relation(fields: [userId], references: [id])
+
+  messages  Message[]
+
+  createdAt DateTime @default(now())
+}
+
+model Message {
+  id      String @id @default(cuid())
+
+  role    MessageRole// user | ai
+  content String
+
+  chatId  String
+  chat    Chat @relation(fields: [chatId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+enum MessageRole {
+  AI
+  USER
 }
