@@ -12,6 +12,11 @@ export class CreateJobDto {
     input!:string
 
     
+    @IsString()
+    @IsNotEmpty()
+    chatId!:string
+
+    
 
 
 }

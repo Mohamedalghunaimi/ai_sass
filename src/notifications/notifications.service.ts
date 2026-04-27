@@ -27,8 +27,7 @@ export class NotificationsService {
         } catch (error) {
             console.error(error)
         }
-
-
     }
+    
 
 }

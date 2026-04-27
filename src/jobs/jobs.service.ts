@@ -21,7 +21,7 @@ export class JobsService {
     private readonly aiService:AiService
   ){}
   async create(createJobDto: CreateJobDto,userId:string) {
-    const {type,input} = createJobDto ;
+    const {type,input,chatId} = createJobDto ;
 
 
 
@@ -33,7 +33,7 @@ export class JobsService {
       }
     })
 
-    await this.aiService.addJob(newJob.id,userId,input)
+    await this.aiService.addJob({jobId:newJob.id,userId,input,chatId})
 
 
   return {

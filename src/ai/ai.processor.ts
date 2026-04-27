@@ -8,6 +8,7 @@ import { Job, QueueEvents } from 'bullmq';
 import { ModelAiService } from 'src/model-ai/model-ai.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RedisService } from 'src/redis/redis.service';
+import { NewJob } from 'utils/type';
 
 @Processor('ai-job')
 export class AiProcessor extends WorkerHost  {
@@ -21,9 +22,9 @@ export class AiProcessor extends WorkerHost  {
         super();
     }
 
-    async process(job: Job<{jobId:string,userId:string,input:string}>, token?: string): Promise<any> {
+    async process(job: Job<NewJob>, token?: string): Promise<any> {
 
-        const {jobId,userId,input}  = job.data ;
+        const {jobId,userId,input,chatId}  = job.data ;
 
         
         try {
@@ -33,7 +34,7 @@ export class AiProcessor extends WorkerHost  {
                 status:"PROCESSING"
             }
         })
-        const key = `ai-${input}`;
+        const key = `ai-${input}-${userId}`;
 
         const cached = await this.redis.client.get(key);
         let output :string ;
@@ -46,13 +47,25 @@ export class AiProcessor extends WorkerHost  {
 
     
 
-        await this.prisma.job.update({
-            where:{id:jobId,userId},
-            data:{
-                status:"DONE",
-                output
-            }
-        })
+
+        await this.prisma.$transaction(async(prisma)=> {
+
+
+            await prisma.job.update({
+                where:{id:jobId,userId},
+                data:{
+                    status:"DONE",
+                    output
+                }
+            })
+            await prisma.message.createMany({
+                data: [
+                    { content: input, role: 'USER', chatId: chatId },
+                    { content: output, role: 'AI', chatId: chatId }
+                ]
+            });        
+            })
+
         await this.redis.pub.publish(
             'notifications',
             JSON.stringify({

@@ -10,3 +10,10 @@ export type RefreshPayload = {
     name:string,
     sessionId:string
 }
+
+export type NewJob = {
+    jobId:string,
+    userId:string,
+    input:string,
+    chatId:string
+}
