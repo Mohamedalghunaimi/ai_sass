@@ -13,6 +13,7 @@ export class NotificationsService {
     ){}
 
     public async createNotification(data:NotificationPayload) {
+        try {
         const notification = await this.prisma.notification.create({
             data:{
                 userId:data.userId,
@@ -23,6 +24,10 @@ export class NotificationsService {
             }
         })
         this.gateway.sendToUser(data.userId, notification);
+        } catch (error) {
+            console.error(error)
+        }
+
 
     }
 

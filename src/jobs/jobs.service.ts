@@ -23,6 +23,8 @@ export class JobsService {
   async create(createJobDto: CreateJobDto,userId:string) {
     const {type,input} = createJobDto ;
 
+
+
     const newJob = await this.prisma.job.create({
       data:{
         type,

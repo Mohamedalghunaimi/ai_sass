@@ -19,8 +19,13 @@ export class NotificationListener implements OnModuleInit {
     await this.redis.sub.subscribe('notifications');
 
     this.redis.sub.on('message',async (_, message) => {
+        try {
         const data: NotificationPayload = JSON.parse(message);
         await this.notificationService.createNotification(data);
+        } catch (error) {
+            console.error(error)
+        }
+
 
     });
     }

@@ -3,15 +3,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prettier/prettier */
-import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { Job } from 'bullmq';
-import { resolve } from 'path';
+import { OnWorkerEvent, Processor, QueueEventsHost, WorkerHost } from '@nestjs/bullmq';
+import { Job, QueueEvents } from 'bullmq';
 import { ModelAiService } from 'src/model-ai/model-ai.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RedisService } from 'src/redis/redis.service';
 
 @Processor('ai-job')
-export class AiProcessor extends WorkerHost {
+export class AiProcessor extends WorkerHost  {
 
     constructor(
         private readonly prisma:PrismaService,
@@ -21,7 +20,7 @@ export class AiProcessor extends WorkerHost {
     ) {
         super();
     }
-    
+
     async process(job: Job<{jobId:string,userId:string,input:string}>, token?: string): Promise<any> {
 
         const {jobId,userId,input}  = job.data ;
@@ -42,7 +41,7 @@ export class AiProcessor extends WorkerHost {
             output = cached
         } else {
             output = await this.modelAiService.generateText(input) as string;
-            await this.redis.client.set(key,output)
+            await this.redis.client.set(key,output,'EX', 60 * 60)
         }
 
     
@@ -76,5 +75,26 @@ export class AiProcessor extends WorkerHost {
 
         }
     }
-  
+
+  @OnWorkerEvent('active')
+  onActive(job: Job) {
+    console.log(`Processing job with id ${job.id}`);
+  }
+
+  @OnWorkerEvent('progress')
+  onProgress(job: Job) {
+    console.log(`Job ${job.id} is in progress: % completed.`);
+  }
+
+  @OnWorkerEvent('completed')
+  onCompleted(job: Job) {
+    console.log(`Job with id ${job.id} COMPLETED!`);
+  }
+
+  @OnWorkerEvent('failed')
+  onFailed(job: Job) {
+    console.log(
+      `Job with id ${job.id} FAILED! Attempt Number ${job.attemptsMade}`,
+    );
+  }
 }
