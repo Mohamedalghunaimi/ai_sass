@@ -15,12 +15,11 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { ChatModule } from './chat/chat.module';
 import { MessageModule } from './message/message.module';
 import { LoggerModule } from './logger/logger.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
-    AuthModule, 
-    PrismaModule,
-    JwtModule.register({
+      JwtModule.register({
       global:true,
       
     }),
@@ -28,6 +27,8 @@ import { LoggerModule } from './logger/logger.module';
       isGlobal:true,
       envFilePath:".env"
     }),
+    AuthModule, 
+    PrismaModule,
     JobsModule,
     BullModule.forRootAsync({
       inject:[ConfigService],
@@ -37,6 +38,7 @@ import { LoggerModule } from './logger/logger.module';
               host: config.get<string>("REDIS_HOST"),
               port: Number(config.get<number>("REDIS_PORT")),
               maxRetriesPerRequest: null,
+              enableReadyCheck: false, // to solve problem with redis in docker
           }
         }
 
@@ -49,7 +51,8 @@ import { LoggerModule } from './logger/logger.module';
     NotificationsModule,
     ChatModule,
     MessageModule,
-    LoggerModule
+    LoggerModule,
+    EmailModule
   ],
   controllers: [AppController],
   providers: [AppService],

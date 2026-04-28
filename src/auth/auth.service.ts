@@ -11,6 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { LoginDto } from './dto/LoginDto';
 import { Session, User } from '@prisma/client';
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class AuthService {
@@ -18,7 +19,8 @@ export class AuthService {
   constructor(
     private readonly prisma:PrismaService,
     private readonly jwt:JwtService,
-    private readonly config:ConfigService
+    private readonly config:ConfigService,
+    private readonly emailService:EmailService
 
   ) {}
 
@@ -43,6 +45,8 @@ export class AuthService {
       }
     })
 
+    await this.emailService.sendToEmail(user.email)
+
 
     const result = await this.issueAuth(user)
     return result ;
@@ -57,7 +61,7 @@ export class AuthService {
     if(!user) {
       throw new UnauthorizedException("invalid inputs")
     }
-    const isMatch = await bcrypt.compare(password,user.password as string);
+    const isMatch = await bcrypt.compare(password,user.password );
     if(!isMatch) {
       throw new UnauthorizedException("invalid inputs")
     }
