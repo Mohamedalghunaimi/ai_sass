@@ -28,13 +28,14 @@ export class AiProcessor extends WorkerHost  {
 
         
         try {
+
         await this.prisma.job.update({
             where:{id:jobId,userId},
             data:{
                 status:"PROCESSING"
             }
         })
-        const key = `ai-${input}-${userId}`;
+        const key = `ai-${input}`;
 
         const cached = await this.redis.client.get(key);
         let output :string ;
@@ -58,23 +59,19 @@ export class AiProcessor extends WorkerHost  {
                     output
                 }
             })
-            await prisma.message.createMany({
-                data: [
-                    { content: input, role: 'USER', chatId: chatId },
-                    { content: output, role: 'AI', chatId: chatId }
-                ]
+            await prisma.message.create({
+                data: { content: output, role: 'AI', chatId: chatId }
             });        
-            })
-
-        await this.redis.pub.publish(
-            'notifications',
-            JSON.stringify({
-            userId,
-            jobId,
-            status: 'DONE',
-            output,
-            }),
-        );
+        })
+            await this.redis.pub.publish(
+                'notifications',
+                JSON.stringify({
+                userId,
+                jobId,
+                status: 'DONE',
+                output,
+                }),
+            );
 
         } catch (error) {
 

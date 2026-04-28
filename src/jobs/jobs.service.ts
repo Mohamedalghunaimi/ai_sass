@@ -23,8 +23,6 @@ export class JobsService {
   async create(createJobDto: CreateJobDto,userId:string) {
     const {type,input,chatId} = createJobDto ;
 
-
-
     const newJob = await this.prisma.job.create({
       data:{
         type,
@@ -36,27 +34,9 @@ export class JobsService {
     await this.aiService.addJob({jobId:newJob.id,userId,input,chatId})
 
 
-  return {
-    message: 'Your request is processing 🚀',
-    jobId: newJob.id,
-  };
+
 
 
   }
 
-  findAll() {
-    return `This action returns all jobs`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} job`;
-  }
-
-  update(id: number, updateJobDto: UpdateJobDto) {
-    return `This action updates a #${id} job`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} job`;
-  }
 }

@@ -12,14 +12,8 @@ import * as type from 'utils/type';
 export class JobsController {
   constructor(private readonly jobsService: JobsService) {}
 
-  @Post()
-  @UseGuards(AtGuard)
-  create(
-    @Body() createJobDto: CreateJobDto,
-    @GetUserFromAt() user:type.AccessPayload
-  ) {
-    return this.jobsService.create(createJobDto,user.id);
-  }
+
+  
 
 
 }

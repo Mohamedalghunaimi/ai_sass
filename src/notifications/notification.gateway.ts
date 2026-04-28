@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
@@ -32,7 +34,7 @@ export class NotificationGateway implements OnGatewayConnection,OnGatewayInit,On
     }
     afterInit(server: Server) {
     server.use(async(socket, next) => {
-        const token = socket.handshake.auth.token; // الفرونت إيند بيبعت التوكن هنا
+        const token = socket.handshake.auth.token; 
         if (!token) {
             return next(new Error('Unauthorized: No token provided'));
         }

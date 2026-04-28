@@ -12,6 +12,8 @@ import { AiModule } from './ai/ai.module';
 import { ModelAiModule } from './model-ai/model-ai.module';
 import { RedisModule } from './redis/redis.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { ChatModule } from './chat/chat.module';
+import { MessageModule } from './message/message.module';
 
 @Module({
   imports: [
@@ -43,7 +45,9 @@ import { NotificationsModule } from './notifications/notifications.module';
     AiModule,
     ModelAiModule,
     RedisModule,
-    NotificationsModule
+    NotificationsModule,
+    ChatModule,
+    MessageModule
   ],
   controllers: [AppController],
   providers: [AppService],
