@@ -33,9 +33,16 @@ export class JobsService {
 
     await this.aiService.addJob({jobId:newJob.id,userId,input,chatId})
 
+  }
 
+  async getJobs(
+    userId:string
+  ) {
+    const jobs = await this.prisma.job.findMany({
+      where:{userId}
+    })
 
-
+    return jobs
 
   }
 

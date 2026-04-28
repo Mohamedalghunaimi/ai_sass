@@ -14,6 +14,7 @@ import { RedisModule } from './redis/redis.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ChatModule } from './chat/chat.module';
 import { MessageModule } from './message/message.module';
+import { LoggerModule } from './logger/logger.module';
 
 @Module({
   imports: [
@@ -47,7 +48,8 @@ import { MessageModule } from './message/message.module';
     RedisModule,
     NotificationsModule,
     ChatModule,
-    MessageModule
+    MessageModule,
+    LoggerModule
   ],
   controllers: [AppController],
   providers: [AppService],
