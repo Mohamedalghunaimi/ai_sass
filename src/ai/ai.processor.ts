@@ -63,15 +63,15 @@ export class AiProcessor extends WorkerHost  {
                 data: { content: output, role: 'AI', chatId: chatId }
             });        
         })
-            await this.redis.pub.publish(
-                'notifications',
-                JSON.stringify({
-                userId,
-                jobId,
-                status: 'DONE',
-                output,
-                }),
-            );
+        await this.redis.pub.publish(
+            'notifications',
+            JSON.stringify({
+            userId,
+            jobId,
+            status: 'DONE',
+            output,
+            }),
+        );
 
         } catch (error) {
 
