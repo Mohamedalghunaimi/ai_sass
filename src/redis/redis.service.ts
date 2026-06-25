@@ -15,18 +15,18 @@ export class RedisService implements OnModuleDestroy {
     // cache client
     this.client = new Redis({
       host: config.get<string>("REDIS_HOST") || 'redis',
-      port: 6379,
+      port: config.get<number>("REDIS_PORT") || 6379,
     });
 
     // pub/sub clients
     this.pub = new Redis({
       host: config.get<string>("REDIS_HOST") || 'redis',
-      port: 6379,
+      port: config.get<number>("REDIS_PORT") || 6379,
     });
 
     this.sub = new Redis({
       host: config.get<string>("REDIS_HOST") || 'redis',
-      port: 6379,
+      port: config.get<number>("REDIS_PORT") || 6379,
     });
   }
 

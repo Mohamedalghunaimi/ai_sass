@@ -16,5 +16,4 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 COPY package*.json ./
 
-# في الإنتاج نستخدم migrate deploy قبل تشغيل التطبيق
-CMD npx prisma migrate deploy && node dist/main.js
+CMD npx prisma migrate deploy && npm run start:prod

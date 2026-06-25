@@ -1,22 +1,46 @@
 version: '3.8'
+
 services:
+
   app:
     build:
       context: .
       dockerfile: Dockerfile.dev
+
     volumes:
       - .:/app
-      - /app/node_modules # لمنع الكتابة فوق الـ modules المحلية
+      - /app/node_modules
+
     env_file:
       - .env
+
+    environment:
+      REDIS_HOST: redis_server
+      REDIS_PORT: 6379
+
     ports:
       - "3000:3000"
-    command: sh -c "npx prisma generate && npx prisma db push && npm run start:dev"
+
+    command: >
+      sh -c "
+      npx prisma generate &&
+      npx prisma migrate dev &&
+      npm run start:dev
+      "
+
     depends_on:
-      - redis_server
-    
-  redis_server: 
-    image: redis:alpine
-    container_name: redis-dev
+      redis_server:
+        condition: service_healthy
+
+
+  redis_server:
+    image: redis:7-alpine
+
     ports:
       - "6379:6379"
+
+    healthcheck:
+      test: ["CMD","redis-cli","ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5

@@ -30,6 +30,7 @@ export class NotificationGateway implements OnGatewayConnection,OnGatewayInit,On
 
     handleDisconnect(client: Socket) {
         console.log(`socket ${client.id} is not connected`);
+        client.disconnect(true)
 
     }
     afterInit(server: Server) {
@@ -82,20 +83,14 @@ import { io } from "socket.io-client";
 
 const socket = io("http://localhost:3000", {
   auth: {
-    token: "YOUR_JWT_TOKEN" // التوكن عشان الـ Middleware يوافق عليك
-  },
-
+    token: "YOUR_JWT_TOKEN"
 });
 
-// اسمع لإشعارات الحالة (الـ AI بيفكر)
 socket.on('ai_status', (data) => {
     console.log(`Job ${data.jobId} is ${data.status}`); 
-    // هنا تظهر Spinner أو كلمة "AI is thinking..."
 });
 
-// اسمع للإشعار النهائي (النتيجة وصلت)
 socket.on('notification', (notification) => {
     console.log("New Notification:", notification);
-    // هنا تشيل الـ Spinner وتحدث لستة الرسائل أو تظهر Alert
 });
 */

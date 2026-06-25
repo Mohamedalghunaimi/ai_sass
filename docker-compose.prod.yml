@@ -1,24 +1,51 @@
 version: '3.8'
 
 services:
-  # خدمة التطبيق (Node.js + Prisma)
+
   app:
-    image: my-registry.com/my-app:v1.0.0  # يفضل استخدام Image جاهزة من سجل خاص
+    image: my-registry.com/my-app:v1.0.0
+
     build:
       context: .
-      dockerfile: Dockerfile.prod              # استخدام Dockerfile الإنتاج (Multi-stage)
-    restart: always                       # إعادة التشغيل تلقائياً في حال حدوث خطأ
-    environment:
-      - NODE_ENV=production
-      - DATABASE_URL=${DATABASE_URL}      # جلب القيم من ملف .env الخارجي
+      dockerfile: Dockerfile.prod
+
+    restart: always
+
     ports:
       - "3000:3000"
-    logging:                              # تحديد حجم سجلات البيانات لمنع امتلاء القرص
-      driver: "json-file"
+
+    environment:
+      NODE_ENV: production
+
+      DATABASE_URL: ${DATABASE_URL}
+
+      REDIS_HOST:  redis_server
+      REDIS_PORT: 6379
+
+    depends_on:
+      - redis
+
+    command: >
+      sh -c "
+      npx prisma migrate deploy &&
+      node dist/main.js
+      "
+
+    logging:
+      driver: json-file
       options:
         max-size: "10m"
         max-file: "3"
 
 
+  redis:
+    image: redis:7-alpine
+
+    restart: always
+
+    volumes:
+      - redis_data:/data
 
 
+volumes:
+  redis_data:
